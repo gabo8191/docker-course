@@ -1,0 +1,33 @@
+# FROM --platform=linux/amd64 node:19.2-alpine3.16
+FROM --platform=$BUILDPLATFORM node:19.2-alpine3.16
+
+# alpine is a lightweight linux distribution in this case used for the node image
+
+#cd app (this is the directory where the app will be stored)
+WORKDIR /app
+
+#copy the package.json file to the app directory
+COPY package.json ./
+
+#install the dependencies
+RUN npm install
+
+#copy all the files to the app directory
+COPY . .
+
+#testing and removing the test files
+RUN npm run test && rm -rf tests && rm -rf node_modules
+
+#only production dependencies
+RUN npm install --prod
+
+#Command to run the app
+CMD ["node", "app.js"]
+
+#Docker build --tag cron-ticker:1.0.0 .
+#docker image tag cron-ticker:1.0.0 cron-ticker:latest
+#the dot at the end is the context of the build
+
+#docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t cron-ticker:1.0.0 --push .
+#the before command is to build the image for multiple platforms with buildx
+#buildx is a docker plugin that allows to build images for multiple platforms
